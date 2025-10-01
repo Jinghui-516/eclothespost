@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "363084248499",
+    "project_id": "eclothes-f05b5",
+    "storage_bucket": "eclothes-f05b5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:363084248499:android:81e6f616d380814e7407c6",
+        "android_client_info": {
+          "package_name": "com.example.ecloth"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAhb89faAc4JerZFvYrVi9yoQAm8zAc3N8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
