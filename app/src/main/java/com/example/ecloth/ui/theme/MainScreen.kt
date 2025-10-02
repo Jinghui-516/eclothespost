@@ -25,6 +25,7 @@ import com.example.ecloth.ui.theme.CreatePostScreen
 import com.example.ecloth.ui.theme.PostItem
 import com.example.ecloth.ui.theme.Post
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
