@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material3.Button
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -98,5 +99,10 @@ fun PostItem(post: Post) {
                 }
             }
         }
+        Divider(
+            color = Color.LightGray,
+            thickness = 1.dp,
+            modifier = Modifier.padding(vertical = 8.dp)
+        )
     }
 }

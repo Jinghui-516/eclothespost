@@ -2,6 +2,7 @@ package com.example.ecloth.ui.theme
 
 
 import android.net.Uri
+import androidx.compose.material3.ExperimentalMaterial3Api
 
 data class Post(
     val id: Int,
@@ -10,3 +11,5 @@ data class Post(
     val imageUri: Uri? = null, // 相簿圖片 Uri
     val content: String
 )
+
+
