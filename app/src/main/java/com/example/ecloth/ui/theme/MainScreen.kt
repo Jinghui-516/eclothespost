@@ -27,6 +27,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -135,20 +136,22 @@ fun TopBar() {
 }
 
 @Composable
-fun BottomBar(navController: androidx.navigation.NavController, onCameraClick: () -> Unit) {
+fun BottomBar(navController: NavController, onCameraClick: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 10.dp, vertical = 0.dp), // 稍微縮進邊距讓圓角更明顯
+            .padding(horizontal = 10.dp) // 1. 先設定水平的 padding
+            .padding(bottom = 30.dp),      // 2. 再設定底部的 padding
+        // ⬆️ 增加 bottom padding 讓導覽列整體上移
         contentAlignment = Alignment.BottomCenter
     ) {
         Surface(
-            color = Color(0xFF8B7A70), // ☕ 奶咖色
+            color = Color(0xFF8B7A70),
             shadowElevation = 10.dp,
             shape = RoundedCornerShape(30.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(80.dp) // 🔹 控制導覽列厚度（預設約80dp，可自行調整）
+                .height(70.dp) // 🔹 想細一點可改這裡
         ) {
             Row(
                 modifier = Modifier
@@ -173,6 +176,7 @@ fun BottomBar(navController: androidx.navigation.NavController, onCameraClick: (
         }
     }
 }
+
 
 
 
