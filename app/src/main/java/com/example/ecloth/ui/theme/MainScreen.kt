@@ -139,7 +139,7 @@ fun BottomBar(navController: androidx.navigation.NavController, onCameraClick: (
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 10.dp), // 稍微縮進邊距讓圓角更明顯
+            .padding(horizontal = 10.dp, vertical = 0.dp), // 稍微縮進邊距讓圓角更明顯
         contentAlignment = Alignment.BottomCenter
     ) {
         Surface(
@@ -148,7 +148,7 @@ fun BottomBar(navController: androidx.navigation.NavController, onCameraClick: (
             shape = RoundedCornerShape(30.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp) // 🔹 控制導覽列厚度（預設約80dp，可自行調整）
+                .height(80.dp) // 🔹 控制導覽列厚度（預設約80dp，可自行調整）
         ) {
             Row(
                 modifier = Modifier
