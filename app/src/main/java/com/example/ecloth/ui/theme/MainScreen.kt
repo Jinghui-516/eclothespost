@@ -33,6 +33,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.ecloth.ui.theme.CreatePostScreen
+import com.example.ecloth.ui.theme.LeaderboardScreen
 import com.example.ecloth.ui.theme.PostItem
 import com.example.ecloth.ui.theme.Post
 
@@ -43,6 +44,7 @@ fun MainScreen() {
     val navController = rememberNavController()
     val context = LocalContext.current
 
+    // 🔹 初始貼文列表（假資料）
     val posts = remember {
         mutableStateListOf(
             Post(1, "Alice", R.drawable.karina, null, "今天的穿搭！"),
@@ -50,25 +52,24 @@ fun MainScreen() {
             Post(3, "Cathy", R.drawable.coffee, null, "咖啡廳打卡 ☕")
         )
     }
-
-    // 相機暫存圖片 Uri
     var cameraImageUri by remember { mutableStateOf<Uri?>(null) }
 
-    // 相機啟動器
+
+    // 🔹 相機啟動器：TakePicture
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
     ) { success ->
+        // success = 相機拍照成功
         if (success && cameraImageUri != null) {
-            // 拍照完成後 → 跳去發文頁，帶上相機拍的照片
+            // 拍照成功 → 跳到 CreatePost 頁面並帶著照片 Uri
             navController.navigate("create?imageUri=${Uri.encode(cameraImageUri.toString())}")
         }
     }
-
     Scaffold(
         topBar = { TopBar() },
         bottomBar = {
             BottomBar(
-                navController = navController,
+                navController = navController,// ✅ 將觸發相機的邏輯作為 onCameraClick 參數傳入
                 onCameraClick = {
                     val uri = createImageUri(context)
                     cameraImageUri = uri
@@ -77,41 +78,66 @@ fun MainScreen() {
             )
         }
     ) { innerPadding ->
+        // ... NavHost 內容不變 ...
+
+
+
+        // 🔹 Navigation Graph 設定（首頁 / 發文 / 個人頁）
         NavHost(
             navController = navController,
             startDestination = "home",
             modifier = Modifier.padding(innerPadding)
         ) {
-            // 首頁
+            // ---------------------------------------------
+            // 📌 首頁頁面：顯示貼文列表
+            // ---------------------------------------------
             composable("home") {
-                LazyColumn(modifier = Modifier) {
+                LazyColumn {
                     items(posts) { post ->
                         PostItem(post)
                     }
                 }
             }
 
-            // 建立貼文（支援相機帶進來的照片）
+            // ---------------------------------------------
+            // 📌 建立貼文頁面（支援相機帶入照片）
+            // ---------------------------------------------
             composable("create?imageUri={imageUri}") { backStackEntry ->
+                // 取得從 Nav 傳來的照片 Uri
                 val uriArg = backStackEntry.arguments?.getString("imageUri")
                 val defaultUri = uriArg?.let { Uri.parse(it) }
 
                 CreatePostScreen(
-                    defaultImageUri = defaultUri,
+                    defaultImageUri = defaultUri,  // 相機照片或 null
                     onPostCreated = { imageUri, text ->
-                        posts.add(Post(posts.size + 1, "You", null, imageUri, text))
+                        // 使用者按下「發佈」 → 新增貼文到列表
+                        posts.add(
+                            Post(
+                                posts.size + 1,
+                                "You",
+                                null,
+                                imageUri,
+                                text
+                            )
+                        )
+                        // 發佈完成 → 返回上一頁
                         navController.popBackStack()
                     },
                     onBack = { navController.popBackStack() }
                 )
             }
 
-
-
-            // 個人頁面
+            // ---------------------------------------------
+            // 📌 個人頁面
+            // ---------------------------------------------
             composable("profile") {
                 ProfileScreen()
             }
+            // 📌 排行榜頁面
+            composable("leaderboard") {
+                LeaderboardScreen()
+            }
+
         }
     }
 }
@@ -128,10 +154,16 @@ fun TopBar() {
         },
         actions = {
             IconButton(onClick = { }) {
-                Icon(Icons.Outlined.ChatBubbleOutline, contentDescription = "Chat", tint = Color(0xFF8B7A70))
+                Icon(
+                    Icons.Outlined.ChatBubbleOutline,
+                    contentDescription = "Chat",
+                    tint = Color(0xFF8B7A70)
+                )
             }
         },
-        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.White)
+        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+            containerColor = Color.White
+        )
     )
 }
 
@@ -140,9 +172,8 @@ fun BottomBar(navController: NavController, onCameraClick: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 10.dp) // 1. 先設定水平的 padding
-            .padding(bottom = 30.dp),      // 2. 再設定底部的 padding
-        // ⬆️ 增加 bottom padding 讓導覽列整體上移
+            .padding(horizontal = 10.dp)
+            .padding(bottom = 30.dp), // 🔹 整個底部導覽列往上抬高
         contentAlignment = Alignment.BottomCenter
     ) {
         Surface(
@@ -151,7 +182,7 @@ fun BottomBar(navController: NavController, onCameraClick: () -> Unit) {
             shape = RoundedCornerShape(30.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(70.dp) // 🔹 想細一點可改這裡
+                .height(70.dp)  // 🔹 想要導覽列更「細」就改這裡
         ) {
             Row(
                 modifier = Modifier
@@ -166,8 +197,12 @@ fun BottomBar(navController: NavController, onCameraClick: () -> Unit) {
                 IconButton(onClick = { navController.navigate("create") }) {
                     Icon(Icons.Filled.Add, contentDescription = "Add", tint = Color.White)
                 }
-                IconButton(onClick = { onCameraClick() }) {
-                    Icon(Icons.Filled.CameraAlt, contentDescription = "Camera", tint = Color.White)
+                // ✅ 加回相機按鈕，並使用傳入的 onCameraClick
+
+                IconButton(onClick = { navController.navigate("leaderboard") }) {
+                    Icon(
+                        imageVector = Icons.Default.Leaderboard, contentDescription = "Leaderboard", tint = Color.White
+                    )
                 }
                 IconButton(onClick = { navController.navigate("profile") }) {
                     Icon(Icons.Filled.Person, contentDescription = "Profile", tint = Color.White)
@@ -176,11 +211,9 @@ fun BottomBar(navController: NavController, onCameraClick: () -> Unit) {
         }
     }
 }
-
-
-
-
-// 建立 Uri 用來存相機照片
+// ------------------------------------------------------------
+// 📌 建立一個圖片 Uri，讓相機存照片到媒體庫
+// ------------------------------------------------------------
 fun createImageUri(context: Context): Uri {
     val contentValues = ContentValues().apply {
         put(MediaStore.MediaColumns.DISPLAY_NAME, "photo_${System.currentTimeMillis()}.jpg")

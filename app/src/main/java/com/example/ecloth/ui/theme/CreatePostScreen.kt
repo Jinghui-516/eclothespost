@@ -21,25 +21,37 @@ import java.io.File
 
 @Composable
 fun CreatePostScreen(
-    defaultImageUri: Uri?,
-    onPostCreated: (Uri?, String) -> Unit,
-    onBack: () -> Unit
+    defaultImageUri: Uri?,                     // 預設圖片（如果從外面傳入）
+    onPostCreated: (Uri?, String) -> Unit,     // 建立完成後要回傳：圖片 + 文字內容
+    onBack: () -> Unit                         // 返回按鈕（目前未使用）
 ) {
-    var text by remember { mutableStateOf("") }
-    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    var text by remember { mutableStateOf("") }           // 使用者輸入的貼文文字
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) } // 使用者選擇的圖片 Uri
 
     val context = LocalContext.current
 
-    // 選擇相簿圖片
-    val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+    // -----------------------------
+    // 1. 相簿選圖
+    // -----------------------------
+    val galleryLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri ->
+        // 使用者從相簿選到圖片後更新
         if (uri != null) selectedImageUri = uri
     }
 
-    // 用來暫存拍照的 Uri
+    // -----------------------------
+    // 2. 暫存相機拍照所得的 Uri
+    // -----------------------------
     var tempPhotoUri by remember { mutableStateOf<Uri?>(null) }
 
-    // 相機拍照
-    val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+    // -----------------------------
+    // 3. 相機拍照
+    // -----------------------------
+    val cameraLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.TakePicture()
+    ) { success ->
+        // 拍照成功後，把暫存的 Uri 變成選擇的圖片
         if (success) {
             selectedImageUri = tempPhotoUri
         }
@@ -53,58 +65,63 @@ fun CreatePostScreen(
         Text("建立貼文", style = MaterialTheme.typography.titleLarge)
         Spacer(modifier = Modifier.height(16.dp))
 
-        // 照片框
+        // -----------------------------
+        // 4. 顯示圖片 + 點擊開啟相簿
+        // -----------------------------
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(200.dp)
                 .background(Color.LightGray)
-                .clickable { galleryLauncher.launch("image/*") },
+                .clickable { galleryLauncher.launch("image/*") }, // 點擊選擇相簿圖片
             contentAlignment = Alignment.Center
         ) {
             if (selectedImageUri != null) {
+                // 已選圖片 → 顯示
                 Image(
                     painter = rememberAsyncImagePainter(selectedImageUri),
                     contentDescription = null,
                     modifier = Modifier.fillMaxSize()
                 )
             } else {
+                // 未選圖片 → 顯示提示文字
                 Text("點擊選擇照片")
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // 拍照按鈕
-        // 在 CreatePostScreen.kt 中
-
-// ... (其他程式碼)
-
-        // 拍照按鈕
+        // -----------------------------
+        // 5. 拍照按鈕
+        // -----------------------------
         Button(
             onClick = {
+                // 在 cache 目錄建立暫時照片檔案
                 val photoFile = File(context.cacheDir, "temp_photo.jpg")
-                // 1. 將 Uri存到一個本地變數
+
+                // 用 FileProvider 轉成 content:// 的 Uri（一定要跟 Manifest provider 一樣）
                 val uriToLaunch = FileProvider.getUriForFile(
                     context,
-                    "${context.packageName}.provider", // 要跟 AndroidManifest.xml 一致
+                    "${context.packageName}.provider",
                     photoFile
                 )
-                // 2. 更新狀態
+
+                // 記住這次拍照要存到的 Uri
                 tempPhotoUri = uriToLaunch
-                // 3. 使用本地變數來啟動 cameraLauncher
+
+                // 啟動相機
                 cameraLauncher.launch(uriToLaunch)
             },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("拍照")
         }
-// ... (其他程式碼)
-
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // 文字輸入
+        // -----------------------------
+        // 6. 貼文文字輸入框
+        // -----------------------------
         OutlinedTextField(
             value = text,
             onValueChange = { text = it },
@@ -114,12 +131,15 @@ fun CreatePostScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // 發佈按鈕
+        // -----------------------------
+        // 7. 發佈按鈕（回傳圖片 Uri + 文字）
+        // -----------------------------
         Button(
             onClick = { onPostCreated(selectedImageUri, text) },
             modifier = Modifier.align(Alignment.End)
         ) {
             Text("發佈")
+
         }
     }
 }

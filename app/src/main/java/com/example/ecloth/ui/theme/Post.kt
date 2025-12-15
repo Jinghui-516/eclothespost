@@ -9,7 +9,11 @@ data class Post(
     val userName: String,
     val imageRes: Int? = null, // Drawable 資源
     val imageUri: Uri? = null, // 相簿圖片 Uri
-    val content: String
+    val content: String,
+    val likes: Int = 0
 )
+
+
+
 
 
